@@ -1,5 +1,7 @@
-import "./styles.css";
+import styles from "./styles.css";
 import React, { useState, useEffect } from "react";
+import SignaturePad from "react-signature-canvas";
+import Pdf from "@mikecousins/react-pdf";
 
 export default function App() {
   const [step, setStep] = useState(0);
@@ -46,43 +48,112 @@ export default function App() {
             name: ""
           }
         ]
+      },
+      {
+        type: "done"
       }
     ]
   };
 
   return (
-    <div className="App">
+    <div>
       <h1>{request.steps[step].type}</h1>
-      {request.steps[step].type === "auth" && (
-        <Auth auth={request.steps[step].content}></Auth>
-      )}
-      {request.steps[step].type === "summary" && (
-        <Summary summary={request.steps[step].content}></Summary>
-      )}
-      {request.steps[step].type === "upload" && (
-        <Upload upload={request.steps[step].content}></Upload>
-      )}
-      <button onClick={() => setStep(step + 1)}>Next</button>
+
+      <div className="pure-form pure-form-aligned">
+        <fieldset>
+          {request.steps[step].type === "auth" && (
+            <Auth auth={request.steps[step].content}></Auth>
+          )}
+          {request.steps[step].type === "summary" && (
+            <Summary summary={request.steps[step].content}></Summary>
+          )}
+          {request.steps[step].type === "upload" && (
+            <Upload upload={request.steps[step].content}></Upload>
+          )}
+          {request.steps[step].type === "review" && (
+            <Review upload={request.steps[step].content}></Review>
+          )}
+          {request.steps[step].type === "sign" && (
+            <Sign upload={request.steps[step].content}></Sign>
+          )}
+          {request.steps[step].type !== "done" && (
+            <div className="pure-controls">
+              <button onClick={() => setStep(step + 1)}>Next</button>
+            </div>
+          )}
+        </fieldset>
+      </div>
     </div>
   );
 }
+
+const Review = ({ review }) => {
+  const [page, setPage] = useState(1);
+
+  return (
+    <Pdf file="./sample.pdf" page={page}>
+      {({ pdfDocument, pdfPage, canvas }) => (
+        <>
+          {!pdfDocument && <span>Loading...</span>}
+          {canvas}
+          {Boolean(pdfDocument && pdfDocument.numPages) && (
+            <nav>
+              <ul className="pager">
+                <li className="previous">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    Previous
+                  </button>
+                </li>
+                <li className="next">
+                  <button
+                    disabled={page === pdfDocument.numPages}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          )}
+        </>
+      )}
+    </Pdf>
+  );
+};
+
 const Upload = ({ upload }) => {
-  console.log(upload);
   const value = upload.map((o) => {
     return (
-      <div>
-        {o.name} <input type="file" />
+      <div key={o.key} className="pure-control-group">
+        <label>{o.key}</label>
+        <input key={o.name} type="file" />
       </div>
     );
   });
   return <div>{value}</div>;
 };
 
+const Sign = ({ sign }) => {
+  var sigPad = {};
+  return (
+    <div id="sign">
+      <SignaturePad
+        canvasProps={{ className: "signPad" }}
+        ref={(ref) => {
+          sigPad = ref;
+        }}
+      />
+    </div>
+  );
+};
 const Summary = ({ summary }) => {
-  console.log({ summary });
   const value = Object.keys(summary).map((k, v) => (
-    <div key={k}>
-      {k} : {summary[k]}
+    <div key={k} className="pure-g">
+      <div className="pure-u-1-3">{k}</div>
+      <div className="pure-u-1-3">{summary[k]}</div>
     </div>
   ));
   return <div>{value}</div>;
@@ -90,11 +161,7 @@ const Summary = ({ summary }) => {
 
 const Auth = ({ auth }) => {
   const [state, setState] = useState({});
-  useEffect(() => {
-    console.log({
-      state
-    });
-  }, [state]);
+  useEffect(() => {}, [state]);
 
   const handleInputChange = (event) => {
     const target = event.target;
@@ -111,26 +178,13 @@ const Auth = ({ auth }) => {
 
   const input = Object.keys(auth).map((key) => {
     return (
-      <div key={key}>
-        {key}:
+      <div key={key} className="pure-control-group">
+        <label>{key}</label>
+
         <input key={key} name={key} onChange={handleInputChange} />
       </div>
     );
   });
 
-  return (
-    <div>
-      {input}
-      <button
-        onClick={() => {
-          console.log({
-            state,
-            auth
-          });
-        }}
-      >
-        Check
-      </button>
-    </div>
-  );
+  return <div>{input}</div>;
 };
