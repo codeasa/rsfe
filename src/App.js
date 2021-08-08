@@ -15,7 +15,11 @@ export default function App() {
       },
       {
         type: "summary",
-        content: [{}]
+        content: {
+          productName: "Set for Health",
+          premium: 103000,
+          paymentPeriod: 10
+        }
       },
       {
         type: "review",
@@ -29,9 +33,9 @@ export default function App() {
         type: "upload",
         content: [
           {
-            name: ""
+            name: "ID card"
           },
-          { name: "" }
+          { name: "Driving License" }
         ]
       },
       {
@@ -52,11 +56,37 @@ export default function App() {
       {request.steps[step].type === "auth" && (
         <Auth auth={request.steps[step].content}></Auth>
       )}
-
+      {request.steps[step].type === "summary" && (
+        <Summary summary={request.steps[step].content}></Summary>
+      )}
+      {request.steps[step].type === "upload" && (
+        <Upload upload={request.steps[step].content}></Upload>
+      )}
       <button onClick={() => setStep(step + 1)}>Next</button>
     </div>
   );
 }
+const Upload = ({ upload }) => {
+  console.log(upload);
+  const value = upload.map((o) => {
+    return (
+      <div>
+        {o.name} <input type="file" />
+      </div>
+    );
+  });
+  return <div>{value}</div>;
+};
+
+const Summary = ({ summary }) => {
+  console.log({ summary });
+  const value = Object.keys(summary).map((k, v) => (
+    <div key={k}>
+      {k} : {summary[k]}
+    </div>
+  ));
+  return <div>{value}</div>;
+};
 
 const Auth = ({ auth }) => {
   const [state, setState] = useState({});
