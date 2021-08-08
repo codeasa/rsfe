@@ -127,9 +127,9 @@ const Review = ({ review }) => {
 const Upload = ({ upload }) => {
   const value = upload.map((o) => {
     return (
-      <div key={o.key} className="pure-control-group">
-        <label>{o.key}</label>
-        <input key={o.name} type="file" />
+      <div key={o.name} className="pure-control-group">
+        <label>{o.name}</label>
+        <input name={o.name} type="file" />
       </div>
     );
   });
