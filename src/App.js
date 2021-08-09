@@ -80,7 +80,7 @@ export default function App() {
           )}
           {request.steps[step].type !== "done" && (
             <div className="pure-controls">
-              <button onClick={() => setStep(step + 1)}>Next</button>
+              <button onClick={() => setStep(step + 1)}>Next Step</button>
             </div>
           )}
         </fieldset>
@@ -99,7 +99,7 @@ const Review = ({ review }) => {
 
   return (
     <div>
-      <Document file="sample.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+      <Document file="plan.pdf" onLoadSuccess={onDocumentLoadSuccess}>
         <Page pageNumber={pageNumber} />
       </Document>
       <p>
