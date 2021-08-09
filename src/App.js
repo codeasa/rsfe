@@ -1,7 +1,9 @@
 import styles from "./styles.css";
 import React, { useState, useEffect } from "react";
 import SignaturePad from "react-signature-canvas";
-import Pdf from "@mikecousins/react-pdf";
+import { Document, Page } from "react-pdf";
+import { pdfjs } from "react-pdf";
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 export default function App() {
   const [step, setStep] = useState(0);
@@ -27,7 +29,7 @@ export default function App() {
         type: "review",
         content: [
           {
-            name: ""
+            name: "/plan.pdf"
           }
         ]
       },
@@ -88,39 +90,22 @@ export default function App() {
 }
 
 const Review = ({ review }) => {
-  const [page, setPage] = useState(1);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+
+  function onDocumentLoadSuccess({ numPages }) {
+    setNumPages(numPages);
+  }
 
   return (
-    <Pdf file="./sample.pdf" page={page}>
-      {({ pdfDocument, pdfPage, canvas }) => (
-        <>
-          {!pdfDocument && <span>Loading...</span>}
-          {canvas}
-          {Boolean(pdfDocument && pdfDocument.numPages) && (
-            <nav>
-              <ul className="pager">
-                <li className="previous">
-                  <button
-                    disabled={page === 1}
-                    onClick={() => setPage(page - 1)}
-                  >
-                    Previous
-                  </button>
-                </li>
-                <li className="next">
-                  <button
-                    disabled={page === pdfDocument.numPages}
-                    onClick={() => setPage(page + 1)}
-                  >
-                    Next
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          )}
-        </>
-      )}
-    </Pdf>
+    <div>
+      <Document file="sample.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+        <Page pageNumber={pageNumber} />
+      </Document>
+      <p>
+        Page {pageNumber} of {numPages}
+      </p>
+    </div>
   );
 };
 
