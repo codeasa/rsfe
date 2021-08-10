@@ -1,7 +1,7 @@
 import styles from "./styles.css";
 import React, { useState, useEffect } from "react";
 import SignaturePad from "react-signature-canvas";
-import { Document, Page } from "react-pdf";
+import { Document, Outline, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -110,15 +110,44 @@ const Review = ({ review }) => {
     ));
   };
 
+  function onDocumentLoadSuccess({ numPages }) {
+    setNumPages(numPages);
+    setPageNumber(1);
+  }
+
+  function changePage(offset) {
+    setPageNumber((prevPageNumber) => prevPageNumber + offset);
+  }
+
+  function previousPage() {
+    changePage(-1);
+  }
+
+  function nextPage() {
+    changePage(1);
+  }
+
   return (
-    <div>
-      <div>{showBar()}</div>
-      <Document file={review[docNumber]} onLoadSuccess={onDocumentLoadSuccess}>
-        <Page pageNumber={pageNumber} />
-      </Document>
-      <p>
-        Page {pageNumber} of {numPages}
-      </p>
+    <div className="container">
+      <div className="header">{showBar()}</div>
+      <div>
+        <Document
+          className="content"
+          file={review[docNumber]}
+          onLoadSuccess={onDocumentLoadSuccess}
+        >
+          {Array.from(new Array(numPages), (el, index) => (
+            <div>
+              <Page key={`page_${index + 1}`} pageNumber={index + 1} />
+              <br />
+            </div>
+          ))}
+        </Document>
+      </div>
+      <div className="footer">
+        <button>Previous</button>
+        <button>Confirm and Next</button>
+      </div>
     </div>
   );
 };
