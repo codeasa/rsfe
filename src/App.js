@@ -8,54 +8,54 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 export default function App() {
   const [step, setStep] = useState(0);
 
-  const request = {
-    steps: [
-      {
-        type: "auth",
-        content: {
-          id: "1234",
-          birthday: "0607"
-        }
-      },
-      {
-        type: "summary",
-        content: {
-          productName: "Set for Health",
-          premium: 103000,
-          paymentPeriod: 10
-        }
-      },
-      {
-        type: "review",
-        content: [
-          {
-            name: "/plan.pdf"
+  const requests = [
+    {
+      steps: [
+        {
+          type: "auth",
+          content: {
+            id: "1234",
+            birthday: "0607"
           }
-        ]
-      },
-      {
-        type: "upload",
-        content: [
-          {
-            name: "ID card"
-          },
-          { name: "Driving License" }
-        ]
-      },
-      {
-        type: "sign",
-        content: [
-          {
-            role: "",
-            name: ""
+        },
+        {
+          type: "summary",
+          content: {
+            productName: "Set for Health",
+            premium: 103000,
+            paymentPeriod: 10
           }
-        ]
-      },
-      {
-        type: "done"
-      }
-    ]
-  };
+        },
+        {
+          type: "review",
+          content: ["/plan.pdf", "/sample.pdf"]
+        },
+        {
+          type: "upload",
+          content: [
+            {
+              name: "ID card"
+            },
+            { name: "Driving License" }
+          ]
+        },
+        {
+          type: "sign",
+          content: [
+            {
+              role: "",
+              name: ""
+            }
+          ]
+        },
+        {
+          type: "done"
+        }
+      ]
+    }
+  ];
+
+  var request = requests[0];
 
   return (
     <div>
@@ -73,7 +73,7 @@ export default function App() {
             <Upload upload={request.steps[step].content}></Upload>
           )}
           {request.steps[step].type === "review" && (
-            <Review upload={request.steps[step].content}></Review>
+            <Review review={request.steps[step].content}></Review>
           )}
           {request.steps[step].type === "sign" && (
             <Sign upload={request.steps[step].content}></Sign>
@@ -92,14 +92,28 @@ export default function App() {
 const Review = ({ review }) => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [docNumber, setDocNumber] = useState(0);
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
   }
 
+  const showBar = () => {
+    return new Array(review.length).fill(0).map((v, k) => (
+      <div
+        onClick={() => {
+          setDocNumber(k);
+        }}
+      >
+        {k + 1}
+      </div>
+    ));
+  };
+
   return (
     <div>
-      <Document file="plan.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+      <div>{showBar()}</div>
+      <Document file={review[docNumber]} onLoadSuccess={onDocumentLoadSuccess}>
         <Page pageNumber={pageNumber} />
       </Document>
       <p>
